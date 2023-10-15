@@ -1,10 +1,11 @@
 import Sections from "./Sections"
 import Navbar from "../Components/Navbar"
+import Sidebar from "../Components/Sidebar"
 
 export default function All(){
     return(
         <div className="w-[100%]">
-            <Navbar />
+            <Navbar user="Hamza"/>            
             <Sections/>
         </div>
     )

@@ -1,5 +1,8 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
+import axios from 'axios'
+import { myConfig } from '../config'
 import { Dialog, Disclosure, Popover, Transition } from '@headlessui/react'
+import { publish } from '../DataContext'
 import {
   ArrowPathIcon,
   Bars3Icon,
@@ -10,6 +13,11 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
+import '../Assets/css/Sidebar.css'
+
+
+
+
 
 const products = [
   { name: 'Analytics', description: 'Get a better understanding of your traffic', href: '#', icon: ChartPieIcon },
@@ -28,80 +36,63 @@ function classNames(...classes) {
 }
 
 export default function Sidebar() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [categoryId, setCategoryId] = useState(0)
+    const [Expended, setExpended] = useState(true)
+    let CateId = localStorage.getItem("SelectedCategoryId");
+    const [sections, setSections] = useState(null)
+    const url ="https://localhost:7174/api/Categories";
+    useEffect(()=>{
+        setCategoryId(CateId);
+        const FetchDataQuiz = async ()=>{
+            try {
+                await axios.get(url)
+                .then((response)=>{
+                    setSections(response.data);
+                    console.log(response.data)
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+            FetchDataQuiz();
+        
+    },[1])
+    const SideBarItemChanged = (selected) => {
+        setCategoryId(selected)
+        console.log(selected)
+        publish('dataChanged', selected);
+      };
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [ativeMenu, setActiveMenu] = useState("Programming");
 
   return (
-        <div class="sidebar min-h-screen w-[3.35rem] overflow-hidden border-r hover:w-56 hover:bg-white hover:shadow-lg">
-            <div class="flex h-screen flex-col justify-between pt-2 pb-6">
+        <div className={Expended?"sidebar min-h-screen w-[3.35rem] overflow-hidden border-r hover:bg-white hover:shadow-lg expand":"sidebar min-h-screen w-[3.35rem] overflow-hidden border-r hover:bg-white"}>
+            <div className="flex h-screen flex-col justify-between pt-2 pb-6">
             <div>
-                <div class="w-max p-2.5">
-                <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fc8.alamy.com%2Fcomp%2FH2MMN9%2Fquiz-icon-H2MMN9.jpg&f=1&nofb=1&ipt=af47ea977b5991075cda85baf149c22b4528b14f4c601e6ecdabb549a286ec9f&ipo=images" class="w-10" alt="" />
+                <div className="w-max p-2.5 cursor-pointer" onClick={()=>setExpended(!Expended)} >
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAOwAAADsAEnxA+tAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAA4xJREFUeJzt3L+PFVUUwPEvu6zEhm38EYrFYkOgIiZEbayE3cYQKwmFQGWzpQnSkGBpY6JYGBMbfiQkBAqjW/jrXzDEGCloFgogJmCUEEPYZS3ue3FX38vMvHfe3Jk3309yqn3v7tk7Z+fnPQOSJEmSJEmSJEmSJEmSJEmSJEkwB5wD7gCbxkTiDvAx8HzJbVKbHcAq+SeoK/Ftb84b4zj5J6VrcazUlikwEzEIsBQ0jspbjhgkqgDUUlEF8FPQOCrvx9wJbDVLKoLcx8WuxA+9OR9byCCkpK4A68AiMB80rra7DXwCrJDmWpIkSZIkSZIkSZKGiHoc3DcDvA4cAp4CfwSPrwZ7FbjJv4sWngHXgb05k1I9XgTuM3j1yiPgA2Bntuz+bwG4BvxF/tU9VaKxfQEfUpz8z8BruRLcYgF4QP6NOU40ri/gEuUSXwfOA7vzpAmk//zcGzAiQvoColylWvJ3gZNZMm3fbn9YfBUxGbn6AvYAF0i7slcy5SDyN4a8DfwGfERqLq3DtPQwNKovoOohYFDcAN6oIdf9wMOAfHNGWF9AlIgC2AQ2gC+Z/EniQi/nP4PyrivWgLPUt7csLaoA+pHzJFEjKCqA9YKfD4uv8U5iKxQVwPvAZ6RdfNUieAycoVl3EvUfRQXwbu9zbwK/Fnx2WNR1kqgRlC0AgOdIJzJ/F3xn2KHkU2DXpP8gVVOlAPr2ka5lR9kbfE/+exhTIeck3gKOACeA3yt+d4nBRaWKmvBfdJl0c+Y8aQ1BWW9NJp1uaUIBKKMmXFq9R3rrxUsVvzct9/SzylkA+4AvgMMjfPc70nN9jSnHIaB/GfgL1Tf+BumG0jtUO1/QhHkjqOO8FdxxPgzqOB8Hd1wbF4TYFxCoTUvC7AuYgHEKoO6TPPsCJmDUAviG+peFt223Pyxa3RdwDzgFHCW9AFmZRBXAk5Kf2wA+Bw4AF4N+d1XT8gyhUX0BpyneZTWlOdS+gAl4gbRbH5RsU9vD7QsIdpDU5tVP1hdEtED0teQM6fUwL5Me+qwFjy9JkiRJkiRJkiRJqt0ccI60dj33wolpjcb2BewAVsk/QV2JxvUFHCf/pHQtQvoColYFLwWNo/KWIwbxHUEdF1UA07LWvk0a1RcwSyqC3MfFrkRYX0BUc8EmcIX0IohFYD5oXG13m/RGtRXSXEuSJEmSJEmSJEmSJEmSJEmSpA77BxUX0oUZcODiAAAAAElFTkSuQmCC" className="w-10" alt="" />
                 </div>
-                <ul class="mt-6 space-y-2 tracking-wide">
-                <li class="min-w-max">
-                    <a href="#" aria-label="programming" class="relative flex items-center space-x-4 bg-gradient-to-r from-sky-600 to-cyan-400 px-4 py-3 text-white">
-                    <svg class="-ml-1 h-6 w-6" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 8a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8ZM6 15a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-1Z" class="fill-current text-cyan-400 dark:fill-slate-600"></path>
-                        <path d="M13 8a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V8Z" class="fill-current text-cyan-200 group-hover:text-cyan-300"></path>
-                        <path d="M13 15a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1Z" class="fill-current group-hover:text-sky-300"></path>
-                    </svg>
-                    <span class="-mr-1 font-medium">Programming</span>
-                    </a>
-                </li>
-                <li class="min-w-max">
-                    <a href="#" class="bg group flex items-center space-x-4 rounded-full px-4 py-3 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path class="fill-current text-gray-300 group-hover:text-cyan-300" fill-rule="evenodd" d="M2 6a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1H8a3 3 0 00-3 3v1.5a1.5 1.5 0 01-3 0V6z" clip-rule="evenodd" />
-                        <path class="fill-current text-gray-600 group-hover:text-cyan-600" d="M6 12a2 2 0 012-2h8a2 2 0 012 2v2a2 2 0 01-2 2H2h2a2 2 0 002-2v-2z" />
-                    </svg>
-                    <span class="group-hover:text-gray-700">Langues</span>
-                    </a>
-                </li>
-                <li class="min-w-max">
-                    <a href="#" class="group flex items-center space-x-4 rounded-md px-4 py-3 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path class="fill-current text-gray-600 group-hover:text-cyan-600" fill-rule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clip-rule="evenodd" />
-                        <path class="fill-current text-gray-300 group-hover:text-cyan-300" d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z" />
-                    </svg>
-                    <span class="group-hover:text-gray-700">Culture générale</span>
-                    </a>
-                </li>
-                <li class="min-w-max">
-                    <a href="#" class="group flex items-center space-x-4 rounded-md px-4 py-3 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path class="fill-current text-gray-600 group-hover:text-cyan-600" d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
-                        <path class="fill-current text-gray-300 group-hover:text-cyan-300" d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
-                    </svg>
-                    <span class="group-hover:text-gray-700">Histoire</span>
-                    </a>
-                </li>
-                <li class="min-w-max">
-                    <a href="#" class="group flex items-center space-x-4 rounded-md px-4 py-3 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path class="fill-current text-gray-300 group-hover:text-cyan-300" d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                        <path class="fill-current text-gray-600 group-hover:text-cyan-600" fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
-                    </svg>
-                    <span class="group-hover:text-gray-700">Musique</span>
-                    </a>
-                </li>
-                
-                <li class="min-w-max">
-                    <a href="#" class="group flex items-center space-x-4 rounded-md px-4 py-3 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path class="fill-current text-gray-300 group-hover:text-cyan-300" d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                        <path class="fill-current text-gray-600 group-hover:text-cyan-600" fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
-                    </svg>
-                    <span class="group-hover:text-gray-700">Politique</span>
-                    </a>
-                </li>
+                <ul className="mt-6 space-y-2 tracking-wide">
+                    {sections !== null ? (
+                            sections.map((eleme) => (
+                                <li key={eleme.id} className="min-w-max" onClick={()=>SideBarItemChanged(eleme.id)}>
+                                    <a href={"/sections?idCate="+eleme.id} aria-label="programming" className={eleme.id==categoryId?"relative flex items-center space-x-4 px-4 py-3 active":"relative flex items-center space-x-4 px-4 py-3"}>
+                                        <img src={eleme.image}  width={40}/>
+                                        <span className="-mr-1 font-medium">{eleme.name}</span>
+                                    </a>
+                                </li>
+                            ))
+                        ) : (
+                            <p>Loading...</p>
+                        )}
                 </ul>
             </div>
-            <div class="w-max -mb-3">
-                <a href="#" class="group flex items-center space-x-4 rounded-md px-4 py-3 text-gray-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:fill-cyan-600" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+            <div className="w-max -mb-3">
+                <a href="#" className="group flex items-center space-x-4 rounded-md px-4 py-3 text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:fill-cyan-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                 </svg>
-                <span class="group-hover:text-gray-700">Settings</span>
+                <span className="group-hover:text-gray-700">Settings</span>
                 </a>
             </div>
             </div>
