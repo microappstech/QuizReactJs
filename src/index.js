@@ -11,6 +11,8 @@ import Login from './Pages/Auth/login';
 import Register from './Pages/Auth/Register';
 import Quizes from './Pages/Quizes';
 import Questions from './Pages/Questions';
+import CreateSection from './Admin/Sections/CreateSection';
+import CreateQuize from './Admin/Quize/CreateQuize';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -23,6 +25,8 @@ root.render(
           <Route path='Questions' element={<Questions />} />
           <Route path='login' element={<Login />} />
           <Route path='register' element={<Register />} />
+          <Route path='section/create' element={<CreateSection/>} />
+          <Route path='quize/create' element={<CreateQuize/>} />
           {/* <Route path="contact" element={<Contact />} /> */}
           {/* <Route path="*" element={<NoPage />} /> */}
         </Route>

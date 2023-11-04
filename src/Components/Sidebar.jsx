@@ -40,7 +40,7 @@ export default function Sidebar() {
     const [Expended, setExpended] = useState(true)
     let CateId = localStorage.getItem("SelectedCategoryId");
     const [sections, setSections] = useState(null)
-    const url ="https://localhost:7174/api/Categories";
+    const url =myConfig.apiUrl+"Categories";
     useEffect(()=>{
         setCategoryId(CateId);
         const FetchDataQuiz = async ()=>{
@@ -48,7 +48,7 @@ export default function Sidebar() {
                 await axios.get(url)
                 .then((response)=>{
                     setSections(response.data);
-                    console.log(response.data)
+        
                 });
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -56,10 +56,9 @@ export default function Sidebar() {
         };
             FetchDataQuiz();
         
-    },[1])
+    },[])
     const SideBarItemChanged = (selected) => {
-        setCategoryId(selected)
-        console.log(selected)
+        setCategoryId(selected);
         publish('dataChanged', selected);
       };
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -75,8 +74,8 @@ export default function Sidebar() {
                 <ul className="mt-6 space-y-2 tracking-wide">
                     {sections !== null ? (
                             sections.map((eleme) => (
-                                <li key={eleme.id} className="min-w-max" onClick={()=>SideBarItemChanged(eleme.id)}>
-                                    <a href={"/sections?idCate="+eleme.id} aria-label="programming" className={eleme.id==categoryId?"relative flex items-center space-x-4 px-4 py-3 active":"relative flex items-center space-x-4 px-4 py-3"}>
+                                <li key={eleme.id} className={eleme.id == categoryId?"min-w-max active":"min-w-max"} onClick={(event)=>{SideBarItemChanged(eleme.id);event.preventDefault();}}>
+                                    <a href={"/sections?idCate="+eleme.id} aria-label="programming" className={eleme.id==categoryId?"relative flex items-center space-x-4 px-4 py-3":"relative flex items-center space-x-4 px-4 py-3"}>
                                         <img src={eleme.image}  width={40}/>
                                         <span className="-mr-1 font-medium">{eleme.name}</span>
                                     </a>
@@ -88,11 +87,11 @@ export default function Sidebar() {
                 </ul>
             </div>
             <div className="w-max -mb-3">
-                <a href="#" className="group flex items-center space-x-4 rounded-md px-4 py-3 text-gray-600">
+                <a href="/admin" className="group flex items-center space-x-4 rounded-md px-4 py-3 text-gray-600">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:fill-cyan-600" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                 </svg>
-                <span className="group-hover:text-gray-700">Settings</span>
+                <span className="group-hover:text-gray-700"></span>
                 </a>
             </div>
             </div>

@@ -13,7 +13,7 @@ export default function Questions(){
     const [score, setScore] = useState(0);
     const location = useLocation();
     const params = new URLSearchParams(location.search);
-    const url = myConfig.apiUrl+"Questions/GetQuestions?QuizId="+params.get("QuizId");
+    const url = myConfig.apiUrl+"Questions/GetQuestionsByQuizid?QuizId="+params.get("QuizId");
     const SelectedCategoryId = localStorage.getItem("SelectedCategoryId");
     useEffect(()=>{
         console.log(url)
@@ -59,9 +59,9 @@ export default function Questions(){
                                          <h1>{questions[currentQuestion].description}</h1>
                                          {
                                              questions[currentQuestion].responses.$values.map((res) => (
-                                                 <div className="radio-item w-[100%]" onClick={() => handleAnswerClick(res)} >
+                                                 <div key={res.id} className="radio-item w-[100%]" onClick={() => handleAnswerClick(res)} >
                                                      <input name="radio" id={"radio"+res.id} type="radio"/>
-                                                     <label for={"radio"+res.id} >{res.description}</label>
+                                                     <label htmlFor={"radio"+res.id} >{res.description}</label>
                                                  </div> 
                                              ))
                                          } 
@@ -119,7 +119,7 @@ export default function Questions(){
                                     <p className="result">of {questions.length}</p>
                                 </div>
                                 <div className="result-text-box">
-                                    <div className="heading-secondary">excellent</div>
+                                    <div className="heading-secondary">{(questions.length /2 < score)?<span>Excellent &#128516;</span>: <span>Bad &#128528;</span>}</div>
                                     <p className="paragraph hidden">
                                     You scored higher than 65% of the people who have taken these tests.
                                     </p>
