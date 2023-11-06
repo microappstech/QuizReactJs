@@ -8,7 +8,9 @@ export default function Quizes(){
     const location = useLocation();
     const params = new URLSearchParams(location.search)
     let sectionId = params.get("sectionId");
-    const url = myConfig.apiUrl+"Quizs/GetQuizzes"+sectionId
+    
+    const url = myConfig.apiUrl+ ((sectionId!="" && sectionId !=null )? "Quizs/GetQuizzes"+sectionId : "Quizs")
+    
 
     const [quizes, setQuizes] = useState(null)
 
