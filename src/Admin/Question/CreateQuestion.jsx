@@ -2,26 +2,78 @@ import useFetch from "../../Hooks/UseFetch"
 import { myConfig } from "../../config"
 import { useState ,useEffect} from "react"
 function CreateQuestion() {
-    const [sections, setSections] = useState(null)
+    const [quizes, setQuizes] = useState(null)
     const [question, setQuestion] = useState({
         description:"",
-        
+        quizId:"",
+        responses: [
+            {
+                description: "",
+                isok: true,
+                questionId: null
+            },
+            {
+                description: "",
+                isok: false,
+                questionId: null
+            },
+            {
+                description: "",
+                isok: false,
+                questionId: null
+            },
+            {
+                description: "",
+                isok: false,
+                questionId: null
+            },
+          ]
 
     })
-    const url = myConfig.apiUrl + "sections"
-    const {data,loading,error} = useFetch(url)
-    if(!loading){
-        // setSections(data);
-        // console.log("data : ",data)
-    }
-    useEffect(() => {
-         setSections(data)
-         console.log(data)
+    
+    const url = myConfig.apiUrl + "Quizs"
+
+    useEffect( () => {
+        const FetchDataQuizes = async ()=>{
+            try{
+                await fetch(url)
+                .then(resp=>resp.json())
+                .then(resData=>{setQuizes(resData);console.log(resData)})
+            }catch(err){
+                console.log("Error on fetching data : ",err)
+            }
+        }
+        FetchDataQuizes()
     }, [])
 
+    const handleChange = (e)=>{
+        const { name, value} = e.target;
+        console.log("name : ",name ,"\n Value : ",value);
+        setQuestion(
+            {
+                ...question,
+                [name]: (name==="quizId" || name === "questionId")?parseInt(value): value
+            })
+    }
+    const handleChangeResponse = (index, value)=>{
+        const updatedResponses = [...question.responses];
+            updatedResponses[index].description = value;
+            setQuestion({ ...question, responses: updatedResponses });
+    }
+    const handleIsOkChange = (index, value) => {
+        
+        const updatedResponses = [...question.responses];
+        updatedResponses[index].isok = value;
+        updatedResponses.forEach((response, i) => {
+            if (i !== index) {
+              response.isok = false;
+            }
+          });
+        setQuestion({ ...question, responses: updatedResponses });
+      };
     function handleSubmit(event){
         event.preventDefault();
-        console.log("event : ",event);
+        console.log("event : ",question);
       }
 
     return ( 
@@ -29,37 +81,34 @@ function CreateQuestion() {
             <div className="w-full bg-white border p-6 border-1 border-gray-100 border rounded-lg">
             <form className="w-full ">
                 <div className="flex flex-wrap -mx-3 mb-6">
-                    <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                    <div className="w-full  px-3 mb-6 md:mb-0">
                         <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="grid-first-name">
-                            Quize Name
-                        </label>
-                        <input name="quizename" className="appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" id="grid-first-name" type="text" placeholder="Quize Name" required/>
-                        <p className="text-red-500 text-xs italic hidden">Please fill out this field.</p>
-                    </div>
-                    <div className="w-full md:w-1/2 px-3">
-                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="grid-last-name">
                             Description
                         </label>
-                        <input name="description" className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="Quize Description" />
+                        <textarea 
+                            name="description"
+                            onChange={handleChange}
+                            value={question.description}
+                            className="appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" id="grid-first-name" type="text" placeholder="Question"
+                            required/>
                     </div>
-                    <div className="w-full md:w-1/2 px-3">
+                    <div className="w-full px-3">
                         <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="file">
-                            Picture <small className="text-s  font-thin italic ">(cover)</small>
-                        </label>
-                        <input className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="file" type="file" placeholder="Quize Description" />
-                    </div>
-                    <div className="w-full md:w-1/2 px-3">
-                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="file">
-                            Section
+                            Quize
                         </label>
                         <div className="relative">
-                            <select className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                            <select 
+                                value={question.quizId}
+                                onChange={handleChange}
+                                name="quizId"
+                                required
+                                className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
                                 {
-                                    sections !== null?
-                                    sections.map((section)=>(
-                                        
-                                    <option value={section.id}>{section.name}</option>
-                                    ))
+                                    (quizes !== null )?
+                                    //console.log(quizes)
+                                     quizes.map((quiz)=>(
+                                       <option key={quiz.id} value={quiz.id}>{quiz.name} <small>({quiz.description})</small></option>
+                                     ))
                                     :
                                     <option>Loading...</option>
                                 }
@@ -76,8 +125,17 @@ function CreateQuestion() {
                             Response 1 :
                         </label>
                         <div className="flex">
-                            <textarea className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="first response" />
-                            <input type="radio" name="correct" id="response1"className=" m-4 p-4 rounded" />
+                            <textarea 
+                                required
+                                value={question.responses[0].description}
+                                name="response1"
+                                onChange={(e)=>{handleChangeResponse(0, e.target.value)}}
+                                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="first response" />
+                            <input type="radio"
+                                value={question.responses[0].isok}
+                                checked={question.responses[0].isok}
+                                onChange={(e) => handleIsOkChange(0, e.target.checked)}
+                                name="correct" id="response1"className=" m-4 p-4 rounded" />
                         </div>
                     </div>
                     <div className="w-full md:w-1/2 px-3">
@@ -85,8 +143,19 @@ function CreateQuestion() {
                             Response 2 :
                         </label>
                         <div className="flex">
-                            <textarea className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="second response" />
-                            <input type="radio" name="correct" id="response2" className=" m-4 p-4 rounded " />
+                            <textarea
+                                onChange={(e)=>{handleChangeResponse(1, e.target.value)}}
+                                value={question.responses[1].description}
+                                required
+                                name="response2"
+                                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="second response" />
+                            <input
+                                type="radio"
+                                name="correct" 
+                                value={question.responses[1].isok} 
+                                checked={question.responses[1].isok}
+                                onChange={(e) => handleIsOkChange(1, e.target.checked)}
+                                id="response2" className=" m-4 p-4 rounded " />
                         </div>
                     </div>
                     <div className="w-full md:w-1/2 px-3">
@@ -94,8 +163,19 @@ function CreateQuestion() {
                             Response 3 :
                         </label>
                         <div className="flex">
-                            <textarea className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="third response" />
-                            <input type="radio" name="correct" id="response3" className=" m-4 p-4 rounded"/>
+                            <textarea 
+                                required
+                                onChange={(e)=>{handleChangeResponse(2, e.target.value)}}
+                                value={question.responses[2].description}
+                                name="response3"
+                                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="third response" />
+                            
+                            <input type="radio" 
+                                name="correct"
+                                value={question.responses[2].isok}
+                                checked={question.responses[2].isok}
+                                onChange={(e) => handleIsOkChange(2, e.target.checked)}
+                                id="response3" className="  m-4 p-4 rounded"/>
                         </div>
                     </div>
                     <div className="w-full md:w-1/2 px-3">
@@ -103,8 +183,19 @@ function CreateQuestion() {
                             Response 4 :
                         </label>
                         <div className="flex">
-                            <textarea className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="fourth response" />
-                            <input type="radio" name="correct" id="response4" className=" m-4 p-4 rounded"/>
+                            <textarea 
+                                required
+                                name="response4"
+                                onChange={(e)=>{handleChangeResponse(3, e.target.value)}}
+                                value={question.responses[3].description}
+                                className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="fourth response" />
+                            
+                            <input
+                                type="radio"
+                                value={question.responses[3].isok}
+                                checked={question.responses[3].isok}
+                                onChange={(e) => handleIsOkChange(3, e.target.checked)}
+                                name="correct" id="response4" className=" m-4 p-4 rounded"/>
                         </div>
                     </div>
                 </div>
