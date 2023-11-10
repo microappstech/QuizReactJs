@@ -1,4 +1,7 @@
-import useFetch from "../../Hooks/UseFetch"
+import { useNavigate  } from "react-router-dom"
+
+import PostAction from "../../Hooks/PostAction"
+
 import { myConfig } from "../../config"
 import { useState ,useEffect} from "react"
 function CreateQuestion() {
@@ -10,29 +13,30 @@ function CreateQuestion() {
             {
                 description: "",
                 isok: true,
-                questionId: null
+                questionId: 0
             },
             {
                 description: "",
                 isok: false,
-                questionId: null
+                questionId: 0
             },
             {
                 description: "",
                 isok: false,
-                questionId: null
+                questionId: 0
             },
             {
                 description: "",
                 isok: false,
-                questionId: null
+                questionId: 0
             },
           ]
 
     })
     
     const url = myConfig.apiUrl + "Quizs"
-
+    const navigate = useNavigate();
+    
     useEffect( () => {
         const FetchDataQuizes = async ()=>{
             try{
@@ -48,11 +52,10 @@ function CreateQuestion() {
 
     const handleChange = (e)=>{
         const { name, value} = e.target;
-        console.log("name : ",name ,"\n Value : ",value);
         setQuestion(
             {
                 ...question,
-                [name]: (name==="quizId" || name === "questionId")?parseInt(value): value
+                [name]: (name==="quizId" | name === "questionId")?parseInt(value): value
             })
     }
     const handleChangeResponse = (index, value)=>{
@@ -71,9 +74,31 @@ function CreateQuestion() {
           });
         setQuestion({ ...question, responses: updatedResponses });
       };
-    function handleSubmit(event){
+    const handleSubmit = async (event)=>{
         event.preventDefault();
-        console.log("event : ",question);
+        console.log(JSON.stringify(question));
+        try{
+            const response = await fetch(myConfig.apiUrl+"Questions/New",{
+                method : "POST",
+                mode:"cors",
+                headers : {
+                    "content-type":"application/json",
+                },
+                body : JSON.stringify(question)
+            });
+            if(response.ok){
+                window.alert("Successfuly");
+                navigate("/quizes")
+            }
+            if(!response.ok){
+                window.alert("something happen wrong Check console");
+                const errorMessage = await response.text();
+                console.error('Error:', response.status, errorMessage);
+            }
+        }catch(err){
+            window.alert("something happen wrong Check console");
+            console.log(err)
+        }
       }
 
     return ( 
@@ -107,7 +132,7 @@ function CreateQuestion() {
                                     (quizes !== null )?
                                     //console.log(quizes)
                                      quizes.map((quiz)=>(
-                                       <option key={quiz.id} value={quiz.id}>{quiz.name} <small>({quiz.description})</small></option>
+                                       <option key={quiz.id} value={quiz.id}>{quiz.name} ({quiz.description})</option>
                                      ))
                                     :
                                     <option>Loading...</option>
