@@ -36,13 +36,15 @@ const Modelname = ({isOpen,Onclose}) => {
                     <form action="/sections" method="pos" className="my-10">
                         <div className="flex flex-col space-y-5">
                             {
-                                username ===null?
+                                (username ==null || username == 'null')?
                                 <label htmlFor="email">
                                     <p className="font-medium text-slate-700 pb-2">Name</p>
                                     <input id="email" required name="name" type="text" className="w-full py-3 border border-slate-200 rounded-lg px-3 focus:outline-none focus:border-slate-500 hover:shadow" placeholder="Entrer votre nom" />
                                 </label>
                                 :
-                                null
+                                <span>
+                                    
+                                </span>
                             }
 
                             <div className="">
